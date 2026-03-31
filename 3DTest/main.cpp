@@ -15,8 +15,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <shaderc/shaderc.h>
-#include <shaderc/shaderc.hpp>
+//#include <shaderc/shaderc.h>
+//#include <shaderc/shaderc.hpp>
 
 #include <Eigen/Geometry>
 
@@ -133,6 +133,7 @@ static constexpr bool ENABLE_VALIDATION = true;
 // ────────────────────────────────────────────────────────────
 //  Shader helpers  (readTextFile / compileGLSL / createShaderModule)
 // ────────────────────────────────────────────────────────────
+/*
 static std::string readTextFile(const std::string& filename)
 {
     namespace fs = std::filesystem;
@@ -184,15 +185,43 @@ static std::vector<uint32_t> compileGLSL(
 static VkShaderModule createShaderModule(VkDevice device,
     const std::vector<uint32_t>& spirv)
 {
-    VkShaderModuleCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    info.codeSize = spirv.size() * sizeof(uint32_t);
-    info.pCode = spirv.data();
-
-    VkShaderModule module;
+    VkShaderModuleCreateInfo info{};9
     if (vkCreateShaderModule(device, &info, nullptr, &module) != VK_SUCCESS)
         throw std::runtime_error("Failed to create VkShaderModule");
     return module;
+}
+*/
+
+std::vector<char> readSPVFile(const std::string& filename) {
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open shader file: " + filename);
+    }
+
+    size_t fileSize = (size_t)file.tellg();
+    std::vector<char> buffer(fileSize);
+
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+
+    return buffer;
+}
+
+VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
+    VkShaderModuleCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    // 注意：Vulkan 要求 uint32_t* 对齐，用 reinterpret_cast
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create shader module!");
+    }
+
+    return shaderModule;
 }
 
 // ────────────────────────────────────────────────────────────
@@ -1157,13 +1186,14 @@ private:
     // ── Graphics pipeline  (uses .vert / .frag via shaderc) ──
     void createGraphicsPipeline() {
         // ── Compile shaders at runtime ──────────────────────
-        auto vertSPV = compileGLSL(readTextFile("shader.vert"),
-            shaderc_glsl_vertex_shader, "shader.vert");
-        auto fragSPV = compileGLSL(readTextFile("shader.frag"),
-            shaderc_glsl_fragment_shader, "shader.frag");
+        //auto vertCode = compileGLSL(readTextFile("shader.vert"), shaderc_glsl_vertex_shader, "shader.vert");
+        //auto fragCode = compileGLSL(readTextFile("shader.frag"), shaderc_glsl_fragment_shader, "shader.frag");
 
-        VkShaderModule vertModule = createShaderModule(_device, vertSPV);
-        VkShaderModule fragModule = createShaderModule(_device, fragSPV);
+        auto vertCode = readSPVFile("shader.vert.spv");
+        auto fragCode = readSPVFile("shader.frag.spv");
+
+        VkShaderModule vertModule = createShaderModule(_device, vertCode);
+        VkShaderModule fragModule = createShaderModule(_device, fragCode);
 
         VkPipelineShaderStageCreateInfo vertStage{};
         vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

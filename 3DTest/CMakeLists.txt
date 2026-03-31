@@ -15,6 +15,7 @@ target_link_options(${PROJECT_NAME} PRIVATE /ignore:4819)
 find_package(Vulkan REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
+    ${CMAKE_SOURCE_DIR}
     ${Vulkan_INCLUDE_DIRS} 
     "${THIRD_PARTY_DIR}/glm",
     "${THIRD_PARTY_DIR}/eigen",
@@ -33,6 +34,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     debug     glmd.lib              optimized   glm.lib
     debug     OpenMeshCored.lib     optimized   OpenMeshCore.lib
     debug     shaderc_combinedd.lib optimized   shaderc_combined.lib
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
 
