@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+    <View>
+        <coordinateX>-0.0624963157</coordinateX>
+        <coordinateY>-0.451867104</coordinateY>
+        <coordinateZ>-0.225721329</coordinateZ>
+        <rotationX>31.1716328</rotationX>
+        <rotationY>327.044769</rotationY>
+        <orthoL>-5.10959244</orthoL>
+        <orthoR>6.00857449</orthoR>
+        <orthoB>-3.21630979</orthoB>
+        <orthoT>3.96706796</orthoT>
+        <windowW>1500</windowW>
+        <windowH>850</windowH>
+    </View>
+</Config>
